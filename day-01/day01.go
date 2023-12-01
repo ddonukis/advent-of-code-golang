@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -93,6 +94,10 @@ func replaceOverlappingWordsWithDigits(line string) string {
 func extractNumber(line string) (int, error) {
 	re := regexp.MustCompile(`\d`)
 	digits := re.FindAllString(line, -1)
+	if len(digits) == 0 {
+		msg := fmt.Sprintf("no digits found in line '%s'", line)
+		return 0, errors.New(msg)
+	}
 	numberStr := digits[0] + digits[len(digits)-1]
 	numuber, err := strconv.Atoi(numberStr)
 	if err != nil {
