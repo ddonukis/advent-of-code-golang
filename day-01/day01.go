@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	fmt.Println("AoC 2023, day 1!")
+	fmt.Println("AoC 2023, day 1!\n")
 	inputFile, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -25,17 +25,36 @@ func main() {
 
 		line := inputScanner.Text()
 
-		line = replaceOverlappingWordsWithDigits(line)
+		lineReplaced := replaceOverlappingWordsWithDigits(line)
 
-		number, err := extractNumber(line)
+		number, err := extractNumber(lineReplaced)
+
+		if lineReplaced != line {
+			fmt.Printf("%s -> %s -> %d\n", line, lineReplaced, number)
+		}
+
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 		sum += number
 	}
-	fmt.Printf("Sum: %d\n", sum)
+	fmt.Printf("\nSum: %d\n", sum)
+}
 
+func substringIndices(s string, substr string) (indices []int) {
+	indices = make([]int, 0, len(s))
+	cursor := 0
+	for {
+		idx := strings.Index(s[cursor:], substr)
+		if idx < 0 {
+			break
+		}
+		sIdx := cursor + idx
+		indices = append(indices, sIdx)
+		cursor = sIdx + len(substr)
+	}
+	return
 }
 
 type wordDigitLocation struct {
@@ -53,12 +72,10 @@ func replaceOverlappingWordsWithDigits(line string) string {
 
 	wordDigitBounds := make([]wordDigitLocation, 0)
 	for i, w := range digitWords {
-		from := strings.Index(line, w)
-		if from == -1 {
-			continue
+		for _, from := range substringIndices(line, w) {
+			to := from + len(w)
+			wordDigitBounds = append(wordDigitBounds, wordDigitLocation{strconv.Itoa(i + 1), from, to})
 		}
-		to := from + len(w)
-		wordDigitBounds = append(wordDigitBounds, wordDigitLocation{strconv.Itoa(i + 1), from, to})
 	}
 	if len(wordDigitBounds) == 0 {
 		return line
@@ -98,6 +115,12 @@ func extractNumber(line string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	fmt.Printf("%s -> %d\n", line, numuber)
+	// fmt.Printf("%s -> %d\n", line, numuber)
 	return numuber, nil
+}
+
+type DigitPosition struct {
+	value   string
+	idxFrom int32
+	idxTo   int32
 }
