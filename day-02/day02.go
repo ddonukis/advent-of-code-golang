@@ -69,7 +69,19 @@ func (game *Game) isPossible(maxCubeSet CubeSet) bool {
 }
 
 func (game *Game) setPower() int {
-	return 0
+	var maxCubeSet CubeSet
+	for _, set := range game.sets {
+		if set.red > maxCubeSet.red {
+			maxCubeSet.red = set.red
+		}
+		if set.green > maxCubeSet.green {
+			maxCubeSet.green = set.green
+		}
+		if set.blue > maxCubeSet.blue {
+			maxCubeSet.blue = set.blue
+		}
+	}
+	return maxCubeSet.red * maxCubeSet.green * maxCubeSet.blue
 }
 
 func (game *Game) String() string {
