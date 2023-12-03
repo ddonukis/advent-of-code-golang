@@ -130,18 +130,3 @@ func parseLine(line string, lineNumber int) (numbers []Number, symbolMask []bool
 	}
 	return numbers, symbolMask
 }
-
-// Part 2
-type Gear struct {
-	row     int
-	col     int
-	numbers []Number
-}
-
-func (g *Gear) Ratio() (ratio int, err error) {
-	if len(g.numbers) != 2 {
-		return 0, fmt.Errorf("Not a gear in position [%d][%d]: missing numbers", g.row, g.col)
-	}
-	ratio = g.numbers[0].value * g.numbers[1].value
-	return
-}
