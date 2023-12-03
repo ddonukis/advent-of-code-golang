@@ -138,6 +138,10 @@ type Gear struct {
 	numbers []Number
 }
 
-func (g *Gear) Ratio() int {
-	return g.numbers[0].value * g.numbers[1].value
+func (g *Gear) Ratio() (ratio int, err error) {
+	if len(g.numbers) != 2 {
+		return 0, fmt.Errorf("Not a gear in position [%d][%d]: missing numbers", g.row, g.col)
+	}
+	ratio = g.numbers[0].value * g.numbers[1].value
+	return
 }
