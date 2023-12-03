@@ -159,9 +159,7 @@ func makeNumber(digits []rune) *int {
 
 func insertNumber(locations []*int, startIndex int, digits []rune) {
 	numRef := makeNumber(digits)
-	// fmt.Printf("start: %d\n", startIndex)
 	for i := startIndex; i < startIndex+len(digits); i++ {
-		// fmt.Printf("i: %d, num: %d\n", i, *numRef)
 		locations[i] = numRef
 	}
 }
