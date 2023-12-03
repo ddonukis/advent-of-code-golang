@@ -88,7 +88,6 @@ func main() {
 	sum := 0
 	for fileScanner.Scan() {
 		line := fileScanner.Text()
-		// fmt.Printf("%s\n", line)
 		nums, gears := extractNumbers(line, rowNum)
 		numberMatrix = append(numberMatrix, nums)
 		allGears = append(allGears, gears...)
@@ -97,7 +96,6 @@ func main() {
 	for _, g := range allGears {
 		ratio, exists := g.Ratio(&numberMatrix)
 		if exists {
-			fmt.Printf("Ratio: %d\n", ratio)
 			sum += ratio
 		}
 	}
