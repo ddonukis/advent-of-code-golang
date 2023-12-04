@@ -22,14 +22,17 @@ func main() {
 	fScanner := bufio.NewScanner(file)
 
 	totalPoints := 0
+	winningNumsPerCard := make([]int, 0, 208)
 	for fScanner.Scan() {
 		line := fScanner.Text()
 		cardNo, count := countWinningNumbers(line)
+		winningNumsPerCard = append(winningNumsPerCard, count)
 		points := calcPoints(count)
-		fmt.Printf("Card %d: %d\n", cardNo, points)
+		fmt.Printf("Card %d: %d matches\n", cardNo, count)
 		totalPoints += points
 	}
 	fmt.Printf("\nTotal (Part 1): %d\n", totalPoints)
+	fmt.Printf("\nCount (Part 2): %d\n", countCardsWithCopies(&winningNumsPerCard))
 }
 
 func countWinningNumbers(line string) (cardId, count int) {
@@ -81,4 +84,31 @@ func calcPoints(matchCount int) int {
 		points *= 2
 	}
 	return points
+}
+
+func countCardsWithCopies(initialCopiesRef *[]int) int {
+	initialCopies := *initialCopiesRef
+	cumulativeCopiesPerCard := make([]int, len(initialCopies))
+	// iterate bottom to top
+	for i := len(initialCopies) - 1; i >= 0; i-- {
+		copiesWon := initialCopies[i]
+
+		lastCardWon := i + copiesWon
+
+		cumVal := 0
+		for j := i + 1; j <= lastCardWon; j++ {
+			// no copies won after the last card
+			if j > len(cumulativeCopiesPerCard)-1 {
+				break
+			}
+			cumVal++                             // the card itself
+			cumVal += cumulativeCopiesPerCard[j] // copies of cards wan by the card
+		}
+		cumulativeCopiesPerCard[i] = cumVal
+	}
+	totalCopies := len(initialCopies)
+	for _, val := range cumulativeCopiesPerCard {
+		totalCopies += val
+	}
+	return totalCopies
 }
