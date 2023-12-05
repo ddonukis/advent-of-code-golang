@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"slices"
 	"strconv"
@@ -11,8 +12,7 @@ import (
 )
 
 func main() {
-
-	const path = "example.txt"
+	const path = "input.txt"
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -24,16 +24,16 @@ func main() {
 	fmt.Println(seeds)
 	printMap(almanac)
 
-	nextKey := "seed"
-	var found bool
-	for {
-		nextKey, found = findNextMap(nextKey, almanac)
-		if found {
-			fmt.Println(nextKey)
-		} else {
-			break
+	lowestLocation := math.MaxInt
+	for _, seed := range seeds {
+		location := traceSeedToLocation(seed, almanac)
+		fmt.Printf("seed %d -> location %d\n", seed, location)
+		if location < lowestLocation {
+			lowestLocation = location
 		}
 	}
+
+	fmt.Printf("Lowest location (Part 1): %d\n", lowestLocation)
 }
 
 type Range struct {
@@ -102,7 +102,7 @@ func extractData(scanner *bufio.Scanner) (seeds []int, almanac map[string][]Rang
 				}
 				mapValues[idx] = val
 			}
-			rowRange := Range{source: mapValues[1], destination: mapValues[1], length: mapValues[2]}
+			rowRange := Range{source: mapValues[1], destination: mapValues[0], length: mapValues[2]}
 			currentMap = append(currentMap, rowRange)
 		}
 	}
@@ -129,4 +129,29 @@ func findNextMap(key string, almanac map[string][]Range) (nextKey string, found 
 		}
 	}
 	return "", false
+}
+
+func traceSeedToLocation(seed int, almanac map[string][]Range) (location int) {
+	nextId := seed
+	nextKey := "seed"
+	var found bool
+	for {
+		nextKey, found = findNextMap(nextKey, almanac)
+		if found {
+			nextId = getDestination(nextId, almanac[nextKey])
+		} else {
+			location = nextId
+			break
+		}
+	}
+	return location
+}
+
+func getDestination(source int, mapping []Range) (destination int) {
+	for _, r := range mapping {
+		if r.source <= source && source < r.source+r.length {
+			return r.destination + source - r.source
+		}
+	}
+	return source
 }
