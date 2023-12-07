@@ -27,13 +27,13 @@ func (hwb HandWithBid) String() string {
 type HandType int
 
 const (
-	HighCard     HandType = 0
-	OnePair               = 1
-	TwoPair               = 2
-	ThreeOfAKind          = 3
-	FullHouse             = 4
-	FourOfAKind           = 5
-	FiveOfAKind           = 6
+	HighCard HandType = iota
+	OnePair
+	TwoPair
+	ThreeOfAKind
+	FullHouse
+	FourOfAKind
+	FiveOfAKind
 )
 
 func handType(hand Hand) HandType {
