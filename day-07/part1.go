@@ -11,31 +11,6 @@ import (
 	"strings"
 )
 
-var cardRanking = [...]rune{'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'}
-
-type Hand [5]rune
-
-type HandWithBid struct {
-	hand Hand
-	bid  int
-}
-
-func (hwb HandWithBid) String() string {
-	return fmt.Sprintf("{%s - %d}", string(hwb.hand[:]), hwb.bid)
-}
-
-type HandType int
-
-const (
-	HighCard HandType = iota
-	OnePair
-	TwoPair
-	ThreeOfAKind
-	FullHouse
-	FourOfAKind
-	FiveOfAKind
-)
-
 func handType(hand Hand) HandType {
 	uniqueCardCount := make(map[rune]int)
 	for _, card := range hand {
@@ -99,9 +74,10 @@ func parseRow(line string) (HandWithBid, error) {
 	return hwb, nil
 }
 
-func main() {
-	const path = "input.txt"
-	file, err := os.Open(path)
+func part1(filepath string) int {
+	file, err := os.Open(filepath)
+	defer file.Close()
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -127,5 +103,5 @@ func main() {
 		winnings += (idx + 1) * hwb.bid
 	}
 
-	fmt.Printf("Part 1 winnings: %d\n", winnings)
+	return winnings
 }
