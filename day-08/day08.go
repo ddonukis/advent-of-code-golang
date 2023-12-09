@@ -26,7 +26,7 @@ func main() {
 
 	inputScanner := bufio.NewScanner(file)
 
-	re := regexp.MustCompile(`([A-Z]{3})`)
+	re := regexp.MustCompile(`([0-9A-Z]{3})`)
 
 	var commands string
 	nodes := make(map[string]Fork)
@@ -47,12 +47,13 @@ func main() {
 		}
 		nodes[node[0]] = Fork{left: node[1], right: node[2]}
 	}
+	// part1(commands, nodes)
+	part2(commands, nodes)
+}
 
-	// fmt.Printf("%d\n%v\n", len(nodes), nodes)
-	// fmt.Printf("Start at '%s'\n", firstNodeKey)
-
+func part1(commands string, nodes map[string]Fork) {
+	nextNode := "AAA"
 	var stepsTaken, totalSteps int
-	var nextNode string = "AAA"
 
 	startTime := time.Now()
 	fmt.Printf("Started at %v\n", startTime)
@@ -64,14 +65,39 @@ func main() {
 	elapsed := time.Since(startTime)
 	fmt.Printf("Done at %v (%f seconds)\n", time.Now(), elapsed.Seconds())
 	fmt.Printf("Steps took: %d\n", totalSteps)
+}
 
+func part2(commands string, nodes map[string]Fork) {
+	startTime := time.Now()
+	fmt.Printf("Part 2 started at %v\n", startTime)
+
+	cycleLengths := make([]int, 0)
+	for nodeKey := range nodes {
+		if nodeKey[2] == 'A' {
+			var steps, cycleSteps int
+			var nextNode string = nodeKey
+			for len(nextNode) > 0 {
+				steps, nextNode = walkNodesP2(nextNode, commands, nodes)
+				cycleSteps += steps
+			}
+			fmt.Printf("%s cycle %d\n", nodeKey, cycleSteps)
+			cycleLengths = append(cycleLengths, cycleSteps)
+		}
+	}
+	fmt.Println(cycleLengths)
+
+	fmt.Println(lcmSlice(cycleLengths))
+
+	elapsed := time.Since(startTime)
+	fmt.Printf("Part 2 done at %v (%f seconds)\n", time.Now(), elapsed.Seconds())
+	// fmt.Printf("Steps took: %d\n", totalSteps)
 }
 
 func walkNodes(startAt string, commands string, nodes map[string]Fork) (steps int, nextKey string) {
 	nextKey = startAt
 	var command rune
 	for steps, command = range commands {
-		fmt.Printf("% 6d: '%s' -%c-> ", steps+1, nextKey, command)
+		// fmt.Printf("% 6d: '%s' -%c-> ", steps+1, nextKey, command)
 		node, found := nodes[nextKey]
 		if !found {
 			log.Fatalf("Node '%v' not found\n", nextKey)
@@ -84,10 +110,54 @@ func walkNodes(startAt string, commands string, nodes map[string]Fork) (steps in
 		default:
 			log.Fatalf("Invalid command '%v'\n", command)
 		}
-		fmt.Printf("'%s'\n", nextKey)
+		// fmt.Printf("'%s'\n", nextKey)
 		if nextKey == "ZZZ" {
 			return 1 + steps, ""
 		}
 	}
 	return steps + 1, nextKey
+}
+
+func walkNodesP2(startAt string, commands string, nodes map[string]Fork) (steps int, nextKey string) {
+	nextKey = startAt
+	var command rune
+	for steps, command = range commands {
+		// fmt.Printf("% 6d: '%s' -%c-> ", steps+1, nextKey, command)
+		node, found := nodes[nextKey]
+		if !found {
+			log.Fatalf("Node '%v' not found\n", nextKey)
+		}
+		switch command {
+		case 'L':
+			nextKey = node.left
+		case 'R':
+			nextKey = node.right
+		default:
+			log.Fatalf("Invalid command '%v'\n", command)
+		}
+		// fmt.Printf("'%s'\n", nextKey)
+		if nextKey[2] == 'Z' {
+			return 1 + steps, ""
+		}
+	}
+	return steps + 1, nextKey
+}
+
+func gcd(a, b int) int {
+	for b != 0 {
+		a, b = b, a%b
+	}
+	return a
+}
+
+func lcm(a, b int) int {
+	return a / gcd(a, b) * b
+}
+
+func lcmSlice(numbers []int) int {
+	result := numbers[0]
+	for _, number := range numbers[1:] {
+		result = lcm(result, number)
+	}
+	return result
 }
