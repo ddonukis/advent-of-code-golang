@@ -7,7 +7,7 @@ import (
 	"slices"
 )
 
-func part1(maze Maze) {
+func part1(maze Maze) []Tile {
 	maze = padMaze(maze)
 	mazeWidth := len(maze[0])
 	mazeHeight := len(maze)
@@ -28,8 +28,10 @@ func part1(maze Maze) {
 	var exists bool = true
 
 	loopLength := 0
+	loopTiles := make([]Tile, 0)
 	for i := 0; i < mazeHeight*mazeWidth+1; i++ {
-		fmt.Printf("%d: %v\n", i, current)
+		// fmt.Printf("%d: %v\n", i, current)
+		loopTiles = append(loopTiles, current)
 		exists, next = nextTile(maze, current, previous)
 		if !exists {
 			fmt.Println("Reached dead end!")
@@ -46,6 +48,54 @@ func part1(maze Maze) {
 	fmt.Printf("Loop length: %d\n", loopLength)
 	fmt.Printf("Farthest tile at %d steps\n", loopLength/2)
 
+	loopTiles[0].pipeType = findStartTileType(loopTiles[0], loopTiles[1], loopTiles[len(loopTiles)-1])
+
+	return loopTiles
+}
+
+func translateCoordinates(old, relativeOld, relativeNew Coordinates) Coordinates {
+	return Coordinates{
+		X: relativeNew.X + old.X - relativeOld.X,
+		Y: relativeNew.Y + old.Y - relativeOld.Y,
+	}
+}
+
+// Try every possible pipe type and see if we can walk to/from next/prev node.
+// Return the first type that makes it possible.
+func findStartTileType(start Tile, next Tile, prev Tile) int8 {
+	testMaze := make(Maze, 5)
+	for i := range testMaze {
+		testMaze[i] = make(MazeRow, 5)
+	}
+	center := Coordinates{2, 2}
+	next.coordinates = translateCoordinates(next.coordinates, start.coordinates, center)
+	prev.coordinates = translateCoordinates(prev.coordinates, start.coordinates, center)
+	testMaze[next.coordinates.Y][next.coordinates.X] = next.pipeType
+	testMaze[prev.coordinates.Y][prev.coordinates.X] = prev.pipeType
+
+	possibleTypes := [...]int8{
+		VERTICAL,
+		HORIZONTAL,
+		BEND_NORTH_EAST,
+		BEND_NORTH_WEST,
+		BEND_SOUTH_WEST,
+		BEND_SOUTH_EAST,
+	}
+	for _, pipeType := range possibleTypes {
+		testMaze[center.Y][center.X] = pipeType
+		nextExists, foundNext := nextTile(testMaze, Tile{pipeType: pipeType, coordinates: center}, prev)
+		if !nextExists {
+			continue
+		}
+		prevExists, foundPrev := nextTile(testMaze, Tile{pipeType: pipeType, coordinates: center}, next)
+		if !prevExists {
+			continue
+		}
+		if foundNext == next && foundPrev == prev {
+			return pipeType
+		}
+	}
+	return START
 }
 
 type Coordinates struct {

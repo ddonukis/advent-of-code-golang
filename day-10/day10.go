@@ -59,7 +59,7 @@ func (row MazeRow) String() string {
 	for i, tile := range row {
 		switch tile {
 		case NO_PIPE:
-			tiles[i] = ' '
+			tiles[i] = '.'
 		case VERTICAL:
 			tiles[i] = '│'
 		case HORIZONTAL:
