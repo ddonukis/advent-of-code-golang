@@ -49,7 +49,16 @@ func main() {
 	}
 	fmt.Println(maze)
 
-	part1(maze)
+	loopTiles := part1(maze)
+	cleanedMaze := make(Maze, len(maze)+2)
+	for i := range cleanedMaze {
+		cleanedMaze[i] = make(MazeRow, len(maze[0])) // we pad the maze in part 1 and it mutates the row
+	}
+	for _, tile := range loopTiles {
+		cleanedMaze[tile.coordinates.Y][tile.coordinates.X] = tile.pipeType
+	}
+	fmt.Println()
+	fmt.Println(cleanedMaze)
 }
 
 type MazeRow []int8
@@ -59,7 +68,7 @@ func (row MazeRow) String() string {
 	for i, tile := range row {
 		switch tile {
 		case NO_PIPE:
-			tiles[i] = '.'
+			tiles[i] = ' '
 		case VERTICAL:
 			tiles[i] = '│'
 		case HORIZONTAL:
