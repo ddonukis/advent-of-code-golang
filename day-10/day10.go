@@ -48,6 +48,8 @@ func main() {
 		maze = append(maze, row)
 	}
 	fmt.Println(maze)
+
+	part1(maze)
 }
 
 type MazeRow []int8
