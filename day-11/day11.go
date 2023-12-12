@@ -56,19 +56,17 @@ func main() {
 
 	fmt.Println(galaxyMap)
 
-	galaxies := galaxyCoordinates(galaxyMap)
+	galaxies := galaxyCoordinates(galaxyMap, 1000000) // part 1 uses expansion factor 2
 	sumDitances := 0
 	for _, g1 := range galaxies {
 		for _, g2 := range galaxies {
 			if g2.id > g1.id {
-				// fmt.Printf("%d <> %d\n", g1.id, g2.id)
 				sumDitances += manhattanDistance(g1, g2)
 			}
 
 		}
 	}
 	fmt.Printf("Sum distances: %d\n", sumDitances)
-
 }
 
 func abs(n int) int {
@@ -82,7 +80,7 @@ func manhattanDistance(g1 Galaxy, g2 Galaxy) int {
 	return abs(g1.X-g2.X) + abs(g1.Y-g2.Y)
 }
 
-func galaxyCoordinates(gm GalaxyMap) []Galaxy {
+func galaxyCoordinates(gm GalaxyMap, expansionFactor int) []Galaxy {
 	emptyRows := make([]int, 0, len(gm))
 scanRows:
 	for rowIdx, row := range gm {
@@ -109,7 +107,11 @@ scanCols:
 			if isGalaxy {
 				shiftRowsBy, _ := slices.BinarySearch(emptyRows, r)
 				shiftColsBy, _ := slices.BinarySearch(emptyCols, c)
-				g := Galaxy{id: len(galaxies), X: r + shiftRowsBy, Y: c + shiftColsBy}
+				g := Galaxy{
+					id: len(galaxies),
+					X:  r - shiftRowsBy + shiftRowsBy*expansionFactor,
+					Y:  c - shiftColsBy + shiftColsBy*expansionFactor,
+				}
 				galaxies = append(galaxies, g)
 			}
 		}
