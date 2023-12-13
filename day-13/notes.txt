@@ -1,0 +1,17 @@
+#.##..##.
+..#.##.#.
+##......#
+##......#
+..#.##.#.
+..##..##.
+#.#.##.#.
+
+
+axis 0 : compare row 0 <> row 0+1
+
+axis 1 : compare row 1 <> row 1+1
+         compare row 1-1 <> row 1+1+1
+
+axis 2 : compare row 2-0 <> row 2+0+1
+         compare row 2-1 <> row 2+1+1
+         compare row 2-2 <> row 2+2+1
