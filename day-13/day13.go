@@ -81,7 +81,6 @@ func linesToCols(lines []string) []string {
 // return index of a line after which the lines are mirrored,
 // if no mirrored lines found return -1
 func symmetryAxis(lines []string) int {
-	potentialAxes := make([]int, 0, 1)
 tryTestAxis:
 	for testAxis := 0; testAxis+1 < len(lines); testAxis++ {
 		for offset := 0; testAxis-offset >= 0 && testAxis+1+offset < len(lines); offset++ {
@@ -91,16 +90,9 @@ tryTestAxis:
 			}
 			// fmt.Printf("%s %s ta: %d, offset: %d\n", lines[testAxis-offset], lines[testAxis+1+offset], testAxis, offset)
 		}
-		potentialAxes = append(potentialAxes, testAxis)
+		return testAxis
 	}
-	switch len(potentialAxes) {
-	case 0:
-		return -1
-	case 1:
-		return potentialAxes[0]
-	default:
-		return potentialAxes[0]
-	}
+	return -1
 }
 
 func abs(n int) int {
