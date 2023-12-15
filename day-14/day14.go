@@ -92,37 +92,3 @@ func calcColLoad(totalRows int, col Column) int {
 	}
 	return totalLoad
 }
-
-func calcColLoad(totalRows int, unmovablePositions, movablePositions []int) int {
-	var totalLoad, fromRow, toRow, lastMovableIdx int
-	var totalRocks int
-
-	for i := 0; i < len(unmovablePositions)+1; i++ {
-		// find how many movable rocks between current unmovable and next unmovable (or end of grid)
-		if i < len(unmovablePositions) {
-			toRow = unmovablePositions[i]
-		} else {
-			toRow = totalRows
-		}
-		if fromRow == toRow {
-			continue
-		}
-		movablePositions = movablePositions[lastMovableIdx:]
-		totalMovableRocksInRange := 0
-		for j := 0; j < len(movablePositions); j++ {
-			if movablePositions[j] < toRow {
-				totalMovableRocksInRange++
-			} else {
-				lastMovableIdx = j
-				break
-			}
-		}
-		totalLoad += calcCumLoad(fromRow, totalMovableRocksInRange, totalRows)
-		fromRow = toRow + 1
-		totalRocks += totalMovableRocksInRange
-		if totalMovableRocksInRange == len(movablePositions) {
-			break
-		}
-	}
-	return totalLoad
-}
