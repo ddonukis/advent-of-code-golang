@@ -64,12 +64,62 @@ func main() {
 		line := scanner.Text()
 		contraption = append(contraption, []rune(line))
 	}
-	for _, ln := range contraption {
-		fmt.Println(string(ln))
+
+	tracer := InitTraceWithCache()
+
+	eP1, _ := calcEnergizedTiles(Beam{0, 0, DirEast}, contraption, tracer)
+	fmt.Printf("Part 1 energized: %d\n", eP1)
+
+	contraptionW := len(contraption[0])
+	contraptionH := len(contraption)
+
+	startingBeams := make([]Beam, 0, 4+contraptionH*contraptionW)
+	// corners
+	startingBeams = append(startingBeams, Beam{0, 0, DirEast})
+	startingBeams = append(startingBeams, Beam{0, 0, DirSouth})
+	startingBeams = append(startingBeams, Beam{contraptionW - 1, 0, DirWest})
+	startingBeams = append(startingBeams, Beam{contraptionW - 1, 0, DirSouth})
+	startingBeams = append(startingBeams, Beam{contraptionW - 1, contraptionH - 1, DirNorth})
+	startingBeams = append(startingBeams, Beam{contraptionW - 1, contraptionH - 1, DirWest})
+	startingBeams = append(startingBeams, Beam{0, contraptionH - 1, DirEast})
+	startingBeams = append(startingBeams, Beam{0, contraptionH - 1, DirNorth})
+	// north edge
+	for i := 1; i < contraptionW-1; i++ {
+		startingBeams = append(startingBeams, Beam{X: i, Y: 0, direction: DirSouth})
+	}
+	// south edge
+	for i := 1; i < contraptionW-1; i++ {
+		startingBeams = append(startingBeams, Beam{X: i, Y: contraptionH - 1, direction: DirNorth})
+	}
+	// west edge
+	for i := 1; i < contraptionH-1; i++ {
+		startingBeams = append(startingBeams, Beam{X: 0, Y: i, direction: DirEast})
+	}
+	// east edge
+	for i := 1; i < contraptionH-1; i++ {
+		startingBeams = append(startingBeams, Beam{X: contraptionW - 1, Y: i, direction: DirWest})
 	}
 
+	maxEnergized := 0
+	var bestStartingBeam Beam
+	for _, beam := range startingBeams {
+		e, _ := calcEnergizedTiles(beam, contraption, tracer)
+		if e > maxEnergized {
+			maxEnergized = e
+			bestStartingBeam = beam
+		}
+	}
+	fmt.Printf("Part 2: Best beam %v -> %d energized\n", bestStartingBeam, maxEnergized)
+
+}
+
+func calcEnergizedTiles(
+	startingBeam Beam,
+	contraption [][]rune,
+	tracer func(Beam, [][]rune) ([][]bool, []Beam),
+) (energized, iterations int) {
 	beams := NewStack[Beam]()
-	beams.Push(Beam{X: 0, Y: 0, direction: DirEast})
+	beams.Push(startingBeam)
 
 	var totalEnergized [][]bool
 
@@ -80,7 +130,7 @@ func main() {
 		if !ok {
 			break
 		}
-		energizedMap, newBeams := trace(curBeam, contraption)
+		energizedMap, newBeams := tracer(curBeam, contraption)
 		traced[curBeam] = true
 		updateTotalEnergizedMap(&totalEnergized, energizedMap)
 
@@ -94,21 +144,16 @@ func main() {
 			break
 		}
 	}
-	fmt.Println()
 	energizedCount := 0
 	for _, ln := range totalEnergized {
 		for _, tile := range ln {
 			if tile {
 				energizedCount++
-				fmt.Print("#")
 			} else {
-				fmt.Print(".")
 			}
 		}
-		fmt.Println()
 	}
-	fmt.Printf("Iterations: %d\n", totalIterations)
-	fmt.Printf("Energized: %d\n", energizedCount)
+	return energizedCount, totalIterations
 }
 
 type Direction struct {
@@ -206,6 +251,24 @@ beamTracing:
 		beam.Move()
 	}
 	return energizedMap, newBeams
+}
+
+type traceOutput struct {
+	energizedTiles *[][]bool
+	newBeams       *[]Beam
+}
+
+func InitTraceWithCache() func(Beam, [][]rune) ([][]bool, []Beam) {
+	cache := make(map[Beam]traceOutput)
+	return func(beam Beam, contraption [][]rune) (energizedTiles [][]bool, newBeams []Beam) {
+		output, cacheExists := cache[beam]
+		if cacheExists {
+			return *output.energizedTiles, *output.newBeams
+		}
+		energizedTiles, newBeams = trace(beam, contraption)
+		cache[beam] = traceOutput{&energizedTiles, &newBeams}
+		return energizedTiles, newBeams
+	}
 }
 
 func inBounds(beam Beam, width, height int) bool {
