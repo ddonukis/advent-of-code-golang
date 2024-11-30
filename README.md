@@ -1,2 +1,2 @@
-# advent-of-code-2023
-Solving Advent of Code 2023 problems and practicing Go programming
+# advent-of-code-golang
+Solving Advent of Code problems and practicing Go programming.
