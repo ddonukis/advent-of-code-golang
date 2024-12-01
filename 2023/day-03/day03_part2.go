@@ -74,7 +74,7 @@ func appendUnique(nums []*int, numRef *int) []*int {
 	return append(nums, numRef)
 }
 
-func main() {
+func Main2() {
 	file, err := os.Open("data.txt")
 	if err != nil {
 		log.Fatal(err)

@@ -89,6 +89,8 @@ func main() {
 		}
 	}
 	fmt.Printf("Part 1: %d\n", sumPart1)
+
+	Main2()
 }
 
 func parseLine(line string, lineNumber int) (numbers []Number, symbolMask []bool) {
