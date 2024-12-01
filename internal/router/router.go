@@ -22,6 +22,7 @@ func RunSolver(year int, day int, filePath string) {
 		switch day {
 		case 1:
 			y2024d01.Part1(filePath)
+			y2024d01.Part2(filePath)
 		case 2:
 			y2024d02.Part1()
 		}

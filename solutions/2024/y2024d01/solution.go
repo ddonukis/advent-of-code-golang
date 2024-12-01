@@ -52,6 +52,45 @@ func Part1(dataFilePath string) {
 	fmt.Printf("Part 1: %d\n", sum)
 }
 
+func Part2(dataFilePath string) {
+	fmt.Println("AOC 2024 - day 01")
+
+	file, err := os.Open(dataFilePath)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	numsA := make([]int, 0)
+	numsB := make(map[int]int)
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		a, b, err := parseLine(line)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		// fmt.Printf("%d, %d\n", a, b)
+		numsA = append(numsA, a)
+		numsB[b] += 1
+		// fmt.Printf("b: %d\n%v\n", b, numsB)
+	}
+
+	sum := 0
+	for _, a := range numsA {
+		appearances := numsB[a]
+
+		score := a * appearances
+		// fmt.Printf("%d * %d = %d\n", a, appearances, score)
+		sum += score
+	}
+
+	fmt.Printf("Part 2: %d\n", sum)
+}
+
 func parseLine(line string) (a, b int, err error) {
 	line = strings.TrimSpace(line)
 	first_num, second_num, found := strings.Cut(line, " ")
