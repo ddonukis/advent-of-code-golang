@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
@@ -40,12 +41,18 @@ Part2: 456`,
 			os.Exit(1)
 		}
 
-		router.RunSolver(year, day)
+		inputFilePath, err := cmd.Flags().GetString("file")
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		router.RunSolver(year, day, inputFilePath)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(solveCmd)
 
-	// Here you will define your flags and configuration settings.
+	solveCmd.Flags().StringP("file", "f", "", "path to the input file")
+
 }

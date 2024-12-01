@@ -8,7 +8,7 @@ import (
 	"github.com/ddonukis/advent-of-code-golang/solutions/2024/y2024d02"
 )
 
-func RunSolver(year int, day int) {
+func RunSolver(year int, day int, filePath string) {
 	not_found := false
 	switch year {
 	case 2018:
@@ -21,7 +21,7 @@ func RunSolver(year int, day int) {
 	case 2024:
 		switch day {
 		case 1:
-			y2024d01.Part1()
+			y2024d01.Part1(filePath)
 		case 2:
 			y2024d02.Part1()
 		}
