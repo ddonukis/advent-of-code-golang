@@ -18,7 +18,6 @@ func Solve(inputPath string) {
 }
 
 func Part1(dataFilePath string) int {
-
 	file, err := os.Open(dataFilePath)
 
 	if err != nil {
@@ -64,6 +63,49 @@ func isGraduallyChanging(numbers []int) bool {
 	return true
 }
 
+func isGraduallyChangingWithRemoval(numbers []int) bool {
+	numbersWithRemovedItem := make([]int, len(numbers)-1)
+	for i := 0; i < len(numbers); i++ {
+		for j, n := range numbers {
+			if j < i {
+				numbersWithRemovedItem[j] = n
+			} else if j > i {
+				numbersWithRemovedItem[j-1] = n
+			}
+		}
+		if isGraduallyChanging(numbersWithRemovedItem) {
+			return true
+		}
+	}
+	return false
+}
+
 func Part2(dataFilePath string) int {
-	return 0
+	file, err := os.Open(dataFilePath)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	var graduallyChaningCount int
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		numbers, err := parseLine(line)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if isGraduallyChanging(numbers) {
+			graduallyChaningCount += 1
+		} else {
+			if isGraduallyChangingWithRemoval(numbers) {
+				graduallyChaningCount += 1
+			}
+		}
+	}
+	return graduallyChaningCount
 }
