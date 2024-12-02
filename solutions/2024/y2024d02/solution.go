@@ -5,16 +5,23 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 )
 
 func Solve(inputPath string) {
 	fmt.Println("AOC 2024 - day 02")
 
+	startTime := time.Now()
 	part1Result := Part1(inputPath)
-	fmt.Printf("Part 1: %d\n", part1Result)
+	elapsed := time.Since(startTime)
 
+	fmt.Printf("Part 1: %d\n%d μs\n", part1Result, elapsed.Microseconds())
+
+	startTime = time.Now()
 	part2Result := Part2(inputPath)
-	fmt.Printf("Part 2: %d\n", part2Result)
+	elapsed = time.Since(startTime)
+
+	fmt.Printf("Part 2: %d\n%d μs\n", part2Result, elapsed.Microseconds())
 }
 
 func Part1(dataFilePath string) int {

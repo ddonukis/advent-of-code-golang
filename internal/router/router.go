@@ -14,7 +14,7 @@ func RunSolver(year int, day int, filePath string) {
 	case 2018:
 		switch day {
 		case 1:
-			y2018d01.Part1()
+			y2018d01.Solve(filePath)
 		default:
 			not_found = true
 		}
