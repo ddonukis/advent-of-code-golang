@@ -58,6 +58,43 @@ func parseLine(line string) (change int, err error) {
 	return
 }
 
-func Part2(inputPath string) int {
-	return 0
+func Part2(inputPath string) (finalFrequency int) {
+	file, err := os.Open(inputPath)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	changeList := make([]int, 0, 100)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		adjustment, err := parseLine(line)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		changeList = append(changeList, adjustment)
+	}
+
+	return simulate(changeList)
+}
+
+func simulate(changeList []int) int {
+	frequenciesReached := make(map[int]int)
+
+	currentFrequency := 0
+	i := 0
+	for {
+		_, reached := frequenciesReached[currentFrequency]
+		if reached {
+			return currentFrequency
+		} else {
+			frequenciesReached[currentFrequency] = 1
+		}
+		currentFrequency += changeList[i]
+		i = (i + 1) % len(changeList)
+	}
 }
