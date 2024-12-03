@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/ddonukis/advent-of-code-golang/internal/router"
@@ -46,6 +47,14 @@ Part2: 456`,
 			log.Fatalln(err)
 		}
 
+		if inputFilePath == "" {
+			inputFilePath, err = defaultFilePath(year, day)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			fmt.Println("default data path:", inputFilePath)
+		}
+
 		router.RunSolver(year, day, inputFilePath)
 	},
 }
@@ -55,4 +64,19 @@ func init() {
 
 	solveCmd.Flags().StringP("file", "f", "", "path to the input file")
 
+}
+
+func defaultFilePath(year, day int) (path string, err error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	path = filepath.Join(
+		dir,
+		"data",
+		strconv.Itoa(year),
+		fmt.Sprintf("%02d", day),
+		"input.txt",
+	)
+	return
 }

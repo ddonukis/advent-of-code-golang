@@ -8,9 +8,26 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
-func Part1(dataFilePath string) {
+func Solve(inputPath string) {
+	fmt.Println("AOC 2024 - day 01")
+
+	startTime := time.Now()
+	part1Result := Part1(inputPath)
+	elapsed := time.Since(startTime)
+
+	fmt.Printf("Part 1: %d\n%d μs\n", part1Result, elapsed.Microseconds())
+
+	startTime = time.Now()
+	part2Result := Part2(inputPath)
+	elapsed = time.Since(startTime)
+
+	fmt.Printf("Part 2: %d\n%d μs\n", part2Result, elapsed.Microseconds())
+}
+
+func Part1(dataFilePath string) int {
 	fmt.Println("AOC 2024 - day 01")
 
 	file, err := os.Open(dataFilePath)
@@ -49,10 +66,10 @@ func Part1(dataFilePath string) {
 		sum += diff
 	}
 
-	fmt.Printf("Part 1: %d\n", sum)
+	return sum
 }
 
-func Part2(dataFilePath string) {
+func Part2(dataFilePath string) int {
 	fmt.Println("AOC 2024 - day 01")
 
 	file, err := os.Open(dataFilePath)
@@ -88,7 +105,7 @@ func Part2(dataFilePath string) {
 		sum += score
 	}
 
-	fmt.Printf("Part 2: %d\n", sum)
+	return sum
 }
 
 func parseLine(line string) (a, b int, err error) {
