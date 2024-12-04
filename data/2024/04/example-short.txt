@@ -1,5 +1,5 @@
-MMMSX
-MSAMX
-AMXSX
-MSAMA
-XMASA
+..X...
+.SAMX.
+.A..A.
+XMAS.S
+.X....

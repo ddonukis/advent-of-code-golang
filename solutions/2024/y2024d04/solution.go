@@ -43,6 +43,10 @@ func readCharMatrix(inputPath string) (charMatrix CharMatrix, err error) {
 	return
 }
 
+func Part2(matrix CharMatrix) int {
+	return 0
+}
+
 type CharMatrix [][]byte
 
 func (m CharMatrix) String() string {
@@ -59,140 +63,4 @@ func (m CharMatrix) String() string {
 		elements = append(elements, fmt.Sprintln())
 	}
 	return strings.Join(elements, "")
-}
-
-func (m CharMatrix) TurnDiagonalClockwise() CharMatrix {
-	rowCount := len(m)
-
-	for row, ln := range m {
-		if len(ln) != rowCount {
-			log.Fatalf("Matrix must be square, row %d doesn't satisfy the requirment.", row)
-		}
-	}
-
-	diagonalizedRowCount := (rowCount-1)*2 + 1
-
-	rotatedMatrix := make(CharMatrix, diagonalizedRowCount)
-
-	for row := 0; row < diagonalizedRowCount; row++ {
-		var i, j int
-		if row < rowCount {
-			i = 0
-		} else {
-			i = row - rowCount + 1
-		}
-		j = row - i
-
-		for {
-			rotatedMatrix[row] = append(rotatedMatrix[row], m[i][j])
-			i += 1
-			j -= 1
-			if i >= rowCount || j < 0 {
-				break
-			}
-		}
-	}
-	return rotatedMatrix
-}
-
-func (m CharMatrix) TurnDiagonalCounterClockwise() CharMatrix {
-	rowCount := len(m)
-
-	for row, ln := range m {
-		if len(ln) != rowCount {
-			log.Fatalf("Matrix must be square, row %d doesn't satisfy the requirment.", row)
-		}
-	}
-
-	diagonalizedRowCount := (rowCount-1)*2 + 1
-
-	rotatedMatrix := make(CharMatrix, diagonalizedRowCount)
-
-	for row := 0; row < diagonalizedRowCount; row++ {
-		var i, j int
-		if row < rowCount {
-			i = 0
-			j = (rowCount - 1) - row
-		} else {
-			i = row - rowCount + 1
-			j = 0
-		}
-
-		for {
-			rotatedMatrix[row] = append(rotatedMatrix[row], m[i][j])
-			i += 1
-			j += 1
-			if i >= rowCount || j >= rowCount {
-				break
-			}
-		}
-	}
-	return rotatedMatrix
-}
-
-func (m CharMatrix) Transpose() CharMatrix {
-	rowCount := len(m)
-
-	for row, ln := range m {
-		if len(ln) != rowCount {
-			log.Fatalf("Matrix must be square, row %d doesn't satisfy the requirment.", row)
-		}
-	}
-
-	rotatedMatrix := make(CharMatrix, rowCount)
-	for rowIdx := range m {
-		rotatedMatrix[rowIdx] = make([]byte, rowCount)
-	}
-
-	for rowIdx, row := range m {
-		for colIdx, item := range row {
-			rotatedMatrix[colIdx][rowIdx] = item
-		}
-	}
-	return rotatedMatrix
-}
-
-func Part1(matrix CharMatrix) int {
-	count := 0
-	for _, ln := range matrix {
-		xmas := strings.Count(string(ln), "XMAS")
-		samx := strings.Count(string(ln), "SAMX")
-
-		// fmt.Printf("%s : %d\n", string(ln), xmas+samx)
-
-		count = count + xmas + samx
-	}
-
-	for _, ln := range matrix.Transpose() {
-		xmas := strings.Count(string(ln), "XMAS")
-		samx := strings.Count(string(ln), "SAMX")
-
-		// fmt.Printf("%s : %d\n", string(ln), xmas+samx)
-
-		count = count + xmas + samx
-	}
-
-	for _, ln := range matrix.TurnDiagonalClockwise() {
-		xmas := strings.Count(string(ln), "XMAS")
-		samx := strings.Count(string(ln), "SAMX")
-
-		// fmt.Printf("%s : %d\n", string(ln), xmas+samx)
-
-		count = count + xmas + samx
-	}
-
-	for _, ln := range matrix.TurnDiagonalCounterClockwise() {
-		xmas := strings.Count(string(ln), "XMAS")
-		samx := strings.Count(string(ln), "SAMX")
-
-		// fmt.Printf("%s : %d\n", string(ln), xmas+samx)
-
-		count = count + xmas + samx
-	}
-
-	return count
-}
-
-func Part2(matrix CharMatrix) int {
-	return 0
 }
