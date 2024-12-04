@@ -17,6 +17,21 @@ func Solve(inputPath string) {
 		log.Fatalln(err)
 	}
 
+	fmt.Println(charMatrix)
+
+	file, err := os.Create("filename.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(charMatrix.String())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	os.Exit(0)
+
 	t0 := time.Now()
 	result1 := Part1(charMatrix)
 	duration := time.Since(t0)
@@ -37,6 +52,8 @@ func readCharMatrix(inputPath string) (charMatrix CharMatrix, err error) {
 	scanner := bufio.NewScanner(file)
 	charMatrix = make(CharMatrix, 0)
 	for scanner.Scan() {
+		// line := scanner.Text()
+		// charMatrix = append(charMatrix, []byte(line))
 		line := scanner.Bytes()
 		charMatrix = append(charMatrix, line)
 	}
@@ -58,7 +75,7 @@ func (m CharMatrix) String() string {
 	elements := make([]string, 0, capacity)
 	for _, ln := range m {
 		for _, ch := range ln {
-			elements = append(elements, fmt.Sprintf("%c, ", ch))
+			elements = append(elements, fmt.Sprintf("%c", ch))
 		}
 		elements = append(elements, fmt.Sprintln())
 	}
