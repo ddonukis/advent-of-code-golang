@@ -10,7 +10,7 @@ import (
 )
 
 func Solve(inputPath string) {
-	fmt.Printf("AoC 2024 - day 3\n\n")
+	fmt.Printf("AoC 2024 - day 4\n\n")
 
 	charMatrix, err := readCharMatrix(inputPath)
 	if err != nil {
