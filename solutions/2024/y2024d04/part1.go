@@ -1,10 +1,5 @@
 package y2024d04
 
-import (
-	"fmt"
-	"strings"
-)
-
 type Vec2 struct {
 	X int
 	Y int
@@ -69,20 +64,10 @@ var directions = [8]Vec2{
 }
 
 func Part1(matrix CharMatrix) int {
-
-	fmt.Printf("%d rows, %d cols\n", len(matrix), len(matrix[0]))
-
-	c := 0
-	c2 := 0
 	searches := make([]Search, 0, 100)
 	for rowIdx, row := range matrix {
-		fmt.Printf("row %d: %d cols\n", rowIdx, len(row))
-
-		c2 += strings.Count(string(row), "X")
-
 		for colIdx, char := range row {
 			if char == 'X' {
-				c += 1
 				for _, direction := range directions {
 					s := Search{
 						startPosition: Vec2{rowIdx, colIdx},
@@ -95,8 +80,6 @@ func Part1(matrix CharMatrix) int {
 			}
 		}
 	}
-
-	fmt.Printf("%d Xs, %d Xs in str, %d searches\n", c, c2, len(searches))
 
 	found := make([]SearchResult, 0, 100)
 	for _, search := range searches {
