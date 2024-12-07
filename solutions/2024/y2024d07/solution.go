@@ -17,7 +17,7 @@ type Equation struct {
 func (eq Equation) TrySolve() (operators []Operator, isPossible bool) {
 	operators = make([]Operator, len(eq.numbers)-1)
 
-	fmt.Printf("%d = %v\n", eq.total, eq.numbers)
+	// fmt.Printf("%d = %v\n", eq.total, eq.numbers)
 	for i := range operators {
 		operators[i] = OP_ADD
 	}
@@ -63,6 +63,7 @@ type Operator uint8
 const (
 	OP_ADD Operator = iota
 	OP_MUL
+	OP_CONCAT
 )
 
 func (op Operator) Next() (nextOp Operator) {
@@ -70,6 +71,8 @@ func (op Operator) Next() (nextOp Operator) {
 	case OP_ADD:
 		return OP_MUL
 	case OP_MUL:
+		return OP_CONCAT
+	case OP_CONCAT:
 		return OP_ADD
 	default:
 		panic("invalid operator")
@@ -77,7 +80,7 @@ func (op Operator) Next() (nextOp Operator) {
 }
 
 func (op Operator) IsLast() bool {
-	return op == OP_MUL
+	return op == OP_CONCAT
 }
 
 func (op Operator) Apply(a, b int) int {
@@ -86,6 +89,12 @@ func (op Operator) Apply(a, b int) int {
 		return a + b
 	case OP_MUL:
 		return a * b
+	case OP_CONCAT:
+		r, err := strconv.Atoi(fmt.Sprintf("%d%d", a, b))
+		if err != nil {
+			panic("bad number concatenation")
+		}
+		return r
 	}
 	return 0
 }
@@ -150,7 +159,7 @@ func parseEquation(line string) Equation {
 	return Equation{total: t, numbers: nums}
 }
 
-func Part1(equations []Equation) (sum int) {
+func Part2(equations []Equation) (sum int) {
 	for _, equation := range equations {
 		_, isPossible := equation.TrySolve()
 
@@ -161,6 +170,6 @@ func Part1(equations []Equation) (sum int) {
 	return sum
 }
 
-func Part2(equations []Equation) int {
+func Part1(equations []Equation) int {
 	return 0
 }
