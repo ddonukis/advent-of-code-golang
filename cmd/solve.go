@@ -28,7 +28,6 @@ Part2: 456`,
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("solve called")
 		fmt.Printf("year: %s day: %s\n", args[0], args[1])
 
 		year, err := strconv.Atoi(args[0])
