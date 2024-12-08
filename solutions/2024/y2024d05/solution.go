@@ -57,7 +57,7 @@ func Part1(inputPath string) int {
 				log.Fatalln(err)
 			}
 			isValid := ruleBook.IsValidOrder(pageNums)
-			fmt.Printf("Line '%s' is %t\n", line, isValid)
+			// fmt.Printf("Line '%s' is %t\n", line, isValid)
 			if isValid {
 				sum += pageNums[len(pageNums)/2]
 			}
@@ -93,16 +93,8 @@ func NewRuleBook() *RuleBook {
 }
 
 func (ruleBook *RuleBook) AddRule(rule Rule) {
-	_, found := ruleBook.Index[rule.before]
-	if found {
-		ruleBook.Index[rule.before] = append(ruleBook.Index[rule.before], rule)
-		ruleBook.Index[rule.after] = append(ruleBook.Index[rule.after], rule)
-	} else {
-		rules := make([]Rule, 1)
-		rules[0] = rule
-		ruleBook.Index[rule.before] = rules
-		ruleBook.Index[rule.after] = slices.Clone(rules)
-	}
+	ruleBook.Index[rule.before] = append(ruleBook.Index[rule.before], rule)
+	ruleBook.Index[rule.after] = append(ruleBook.Index[rule.after], rule)
 }
 
 func (ruleBook *RuleBook) IsValidOrder(pageNums []int) bool {
@@ -120,6 +112,26 @@ func (ruleBook *RuleBook) IsValidOrder(pageNums []int) bool {
 		}
 	}
 	return true
+}
+
+func (ruleBook *RuleBook) ReorderPages(pageNums []int) []int {
+	sortedNums := slices.Clone(pageNums)
+
+	slices.SortFunc(sortedNums, func(a, b int) int {
+		rules, exists := ruleBook.Index[a]
+		if exists {
+			for _, rule := range rules {
+				if rule.before == a && rule.after == b {
+					return -1
+				}
+				if rule.before == b && rule.after == a {
+					return 1
+				}
+			}
+		}
+		return 0
+	})
+	return sortedNums
 }
 
 func parseRule(line string) (rule Rule, err error) {
@@ -153,5 +165,40 @@ func parsePageNums(line string) (pageNums []int, err error) {
 }
 
 func Part2(inputPath string) int {
-	return 0
+	file, err := os.Open(inputPath)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	scanner := bufio.NewScanner(file)
+	isRules := true
+
+	ruleBook := NewRuleBook()
+	sum := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if isRules && line == "" {
+			isRules = false
+			continue
+		}
+
+		if isRules {
+			rule, err := parseRule(line)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			ruleBook.AddRule(rule)
+		} else {
+			pageNums, err := parsePageNums(line)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			reorderedPageNums := ruleBook.ReorderPages(pageNums)
+			if !slices.Equal(pageNums, reorderedPageNums) {
+				sum += reorderedPageNums[len(pageNums)/2]
+			}
+		}
+	}
+	return sum
 }
