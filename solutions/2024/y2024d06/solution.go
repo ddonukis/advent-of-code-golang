@@ -13,12 +13,12 @@ func Solve(inputPath string) {
 	tileMap, guard := parseInput(inputPath)
 
 	t0 := time.Now()
-	result1 := Part1(tileMap, guard)
+	result1 := Part1(tileMap, NewGuard(guard.position, guard.direction))
 	duration := time.Since(t0)
 	fmt.Printf("Part 1: %d\n%d μs\n\n", result1, duration.Microseconds())
 
 	t0 = time.Now()
-	result2 := Part2(tileMap, guard)
+	result2 := Part2(tileMap, NewGuard(guard.position, guard.direction))
 	duration = time.Since(t0)
 	fmt.Printf("Part 2: %d\n%d μs\n", result2, duration.Microseconds())
 }
@@ -31,8 +31,33 @@ func Part1(tileMap TileMap, guard Guard) int {
 	return guard.UniqueVisitedTiles()
 }
 
-func Part2(labMap TileMap, guard Guard) int {
-	return 0
+func Part2(tileMap TileMap, guard Guard) int {
+	startPos := guard.position
+	startDir := guard.direction
+
+	for guard.MoveOneStep(tileMap) {
+		if guard.inLoop {
+			break
+		}
+	}
+	possibleObstaclePositions := guard.visitedPositions
+	delete(possibleObstaclePositions, startPos)
+	newObstructionCount := 0
+	for newObstaclePos := range possibleObstaclePositions {
+		loopyGuard := NewGuard(startPos, startDir)
+		tileMap.UpdateTile(newObstaclePos, OBSTACLE)
+		for loopyGuard.MoveOneStepP2(tileMap) {
+			if loopyGuard.inLoop {
+				fmt.Printf("New obstruction at: %v\n", newObstaclePos)
+				fmt.Println()
+				newObstructionCount++
+				break
+			}
+		}
+		tileMap.UpdateTile(newObstaclePos, EMPTY)
+	}
+
+	return newObstructionCount
 }
 
 type TileMap [][]Tile
@@ -62,6 +87,10 @@ func (tm TileMap) String() string {
 
 func (tm TileMap) GetTile(position Coord2D) Tile {
 	return tm[position.X][position.Y]
+}
+
+func (tm TileMap) UpdateTile(position Coord2D, newTile Tile) {
+	tm[position.X][position.Y] = newTile
 }
 
 func parseInput(inputPath string) (tileMap TileMap, guard Guard) {
@@ -161,6 +190,13 @@ type Guard struct {
 	position         Coord2D
 	direction        Direction
 	visitedPositions map[Coord2D]int
+	inLoop           bool
+	knownStates      map[State]int
+}
+
+type State struct {
+	position  Coord2D
+	direction Direction
 }
 
 func NewGuard(position Coord2D, direction Direction) Guard {
@@ -168,6 +204,7 @@ func NewGuard(position Coord2D, direction Direction) Guard {
 		position:         position,
 		direction:        direction,
 		visitedPositions: make(map[Coord2D]int),
+		knownStates:      make(map[State]int),
 	}
 }
 
@@ -182,6 +219,30 @@ func (g *Guard) MoveOneStep(tileMap TileMap) (withinBounds bool) {
 		g.position = nextPos
 		g.visitedPositions[g.position] += 1
 	case OBSTACLE:
+		if g.visitedPositions[g.position] > 1 {
+			fmt.Printf("Guard has already been at %v: %d times\n", g.position, g.visitedPositions[g.position]-1)
+			g.inLoop = true
+		}
+		g.TurnRight()
+	}
+	return true
+}
+
+func (g *Guard) MoveOneStepP2(tileMap TileMap) (withinBounds bool) {
+	dirVec := directionVecs[g.direction]
+	nextPos := g.position.Add(dirVec)
+	nextTile := tileMap.GetTile(nextPos)
+	switch nextTile {
+	case OUT_OF_BOUNDS:
+		return false
+	case EMPTY:
+		g.position = nextPos
+		g.knownStates[State{g.position, g.direction}] += 1
+	case OBSTACLE:
+		if beenTimes := g.knownStates[State{g.position, g.direction}]; beenTimes > 1 {
+			fmt.Printf("Guard has already been at %v: %d times\n", State{g.position, g.direction}, beenTimes-1)
+			g.inLoop = true
+		}
 		g.TurnRight()
 	}
 	return true
