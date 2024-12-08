@@ -151,10 +151,10 @@ const (
 )
 
 var directionVecs = map[Direction]Coord2D{
-	UP:    Coord2D{-1, 0},
-	DOWN:  Coord2D{1, 0},
-	RIGHT: Coord2D{0, 1},
-	LEFT:  Coord2D{0, -1},
+	UP:    {-1, 0},
+	DOWN:  {1, 0},
+	RIGHT: {0, 1},
+	LEFT:  {0, -1},
 }
 
 type Guard struct {
