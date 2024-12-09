@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -28,21 +29,52 @@ func parseInput(inputPath string) []int {
 	}
 	scanner := bufio.NewScanner(file)
 
+	var nums []int
 	for scanner.Scan() {
 		if err := scanner.Err(); err != nil {
 			panic(err)
 		}
 		line := scanner.Text()
-		fmt.Println(line)
+		nums = make([]int, len(line))
+		for i, dig := range line {
+			n, err := strconv.Atoi(string(dig))
+			if err != nil {
+				panic(err)
+			}
+			nums[i] = n
+		}
+		fmt.Printf("len(nums): %d\n", len(nums))
+		return nums
 	}
-
 	return make([]int, 0)
 }
 
-func Part1(data []int) int {
-	return 0
+func Part1(nums []int) int {
+	mem := unfoldMemLayout(nums)
+
+	lastIdx := len(mem) - 1
+	for idx := 0; idx < len(mem); idx++ {
+		block := mem[idx]
+		if block.isFree {
+			for i := lastIdx; i > idx; i-- {
+				if mem[i].isFree {
+					continue
+				}
+				mem[idx] = mem[i]
+				mem[i] = block
+				lastIdx = i
+				break
+			}
+			if lastIdx <= idx {
+				break
+			}
+		}
+	}
+
+	return checksum(mem)
 }
 
-func Part2(data []int) int {
-	return 0
+func Part2(nums []int) int {
+	mem := unfoldMemLayout(nums)
+	return checksum(mem)
 }
