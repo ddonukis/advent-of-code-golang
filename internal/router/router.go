@@ -13,6 +13,7 @@ import (
 	"github.com/ddonukis/advent-of-code-golang/solutions/2024/y2024d07"
 	"github.com/ddonukis/advent-of-code-golang/solutions/2024/y2024d08"
 	"github.com/ddonukis/advent-of-code-golang/solutions/2024/y2024d09"
+	"github.com/ddonukis/advent-of-code-golang/solutions/2024/y2024d12"
 )
 
 func RunSolver(year int, day int, filePath string) {
@@ -39,6 +40,8 @@ func RunSolver(year int, day int, filePath string) {
 		y2024d08.Solve(filePath)
 	case year == 2024 && day == 9:
 		y2024d09.Solve(filePath)
+	case year == 2024 && day == 12:
+		y2024d12.Solve(filePath)
 	default:
 		fmt.Printf("No solution found for year %d and day %d.\n", year, day)
 	}

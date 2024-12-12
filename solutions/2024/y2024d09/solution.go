@@ -74,7 +74,92 @@ func Part1(nums []int) int {
 	return checksum(mem)
 }
 
+func findFreeSpan(mem []Block, startAt int, size int, stopAt int) int {
+	curSize := 0
+	idx := startAt
+	for idx < stopAt {
+		if mem[idx].isFree {
+			curSize++
+		} else {
+			curSize = 0
+		}
+		if curSize == size {
+			return idx - curSize + 1
+		}
+		idx++
+	}
+	return -1
+}
+
+func moveBlocks(startsAt int, size int8, mem []Block, leftmostFreeIdxBySize map[int8]int) (moved bool) {
+	idx, found := leftmostFreeIdxBySize[size]
+
+	if !found {
+		// search from 0
+	} else if found && idx > 0 && idx < startsAt && !mem[idx].isFree {
+		// search from idx
+	} else if found && (idx == -1 || idx > startsAt) {
+		return false
+		// no free space to the left of the file -> end
+	} else {
+		// can swap
+	}
+
+	for i := 0; i < int(size); i++ {
+		mem[idx+i] = mem[startsAt+i]
+		mem[startsAt+i] = Block{0, true}
+	}
+
+	return false
+}
+
 func Part2(nums []int) int {
 	mem := unfoldMemLayout(nums)
+
+	leftmostFreeIdxBySize := make(map[int8]int) // size -> leftmost idx
+
+	var curFileSize int8 = 0
+	var curFileId int16 = -1
+
+	// 00...111...2...333.44.5555.6666.777.888899
+	for i := len(mem) - 1; i > -1; i-- {
+		block := mem[i]
+		if block.isFree {
+			if curFileId > 0 {
+				fmt.Printf("id: %d, size: %d\n", curFileId, curFileSize)
+				moveBlocks(i+1, curFileSize, mem, leftmostFreeIdxBySize)
+				curFileId = -1
+				curFileSize = 0
+			}
+		} else if block.id != curFileId {
+			if curFileId > 0 {
+				fmt.Printf("id: %d, size: %d\n", curFileId, curFileSize)
+				moveBlocks(i+1, curFileSize, mem, leftmostFreeIdxBySize)
+			}
+			curFileId = block.id
+			curFileSize = 1
+		} else {
+			curFileSize++
+		}
+	}
+	if curFileId > -1 {
+		fmt.Printf("id: %d, size: %d\n", curFileId, curFileSize)
+	}
+
+	// curFreeSize := 0
+	// curFreeStartIdx := 0
+	// for idx := 0; idx < len(mem); idx++ {
+	// 	block := mem[idx]
+	// 	if block.isFree {
+	// 		if curFreeSize == 0 {
+	// 			curFreeSize += 1
+	// 			curFreeStartIdx = idx
+	// 		}
+	// 	} else {
+	// 		leftmostFreeIdxBySize[curFreeSize] =
+	// 	}
+
+	// }
+
 	return checksum(mem)
 }
