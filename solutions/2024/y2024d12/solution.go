@@ -23,84 +23,85 @@ func Solve(inputPath string) {
 
 func Part1(matrix [][]rune) int {
 	fmt.Printf("%v\n", matrix)
-
-	crawlMap := make([][]int, len(matrix))
-	for rowIdx := range matrix {
-		crawlMap[rowIdx] = make([]int, len(matrix[rowIdx]))
-		for colIdx := range crawlMap[rowIdx] {
-			crawlMap[rowIdx][colIdx] = -1
-		}
-	}
-
-	crawlerId := 0
-	x, y := 0
-	var nextX, nextY int
-	for {
-		// explore all connected tiles
-		if crawlMap[x][y] == -1 {
-			crawlMap[x][y] = crawlerId
-		}
-
-	}
+	crawler := NewCrawler(Vec2D{0, 0}, matrix)
+	crawler.Crawl()
+	return 0
 }
-
-type Vec2D struct {
-	X, Y int
-}
-
-func (v Vec2D) Add(otherV Vec2D) Vec2D {
-	return Vec2D{v.X + otherV.X, v.Y + otherV.Y}
-}
-
-func ExploreNodes(start Vec2D, crawlerId CrawlerId, matrix [][]rune, crawlMap [][]int) {
-	crawler := NewCrawler(crawlerId, start, matrix)
-}
-
-type CrawlerId int
-
-type CrawlState struct {
-	crawlerID CrawlerId
-	availableDirs
-}
-
 
 type Crawler struct {
-	id       CrawlerId
-	crop     rune
-	position Vec2D
-	matrix   [][]rune
-	crawlMap [][]CrawlerId
+	crop              rune
+	visitedNodes      Set[Vec2D]
+	canBeVisitedNodes Set[Vec2D]
+	position          Vec2D
+	direcion          Vec2D
+	matrix            [][]rune
 }
 
-func NewCrawler(id CrawlerId, position Vec2D, matrix [][]rune) Crawler {
+func (cr Crawler) String() string {
+	field := make([][]byte, len(cr.matrix[0]))
+	for i, row := range cr.matrix {
+		field[i] = make([]byte, len(row))
+		for j := range field[i] {
+			field[i][j] = '.'
+		}
+	}
+	for visited := range cr.visitedNodes.items {
+		field[visited.X][visited.Y] = 'O'
+	}
+	for visited := range cr.canBeVisitedNodes.items {
+		field[visited.X][visited.Y] = 'X'
+	}
+	///
+	return ""
+}
+
+func NewCrawler(position Vec2D, matrix [][]rune) Crawler {
 	return Crawler{
-		id:       id,
-		crop:     matrix[position.X][position.Y],
-		position: position,
-		matrix:   matrix,
+		crop:              matrix[position.X][position.Y],
+		visitedNodes:      NewSet[Vec2D](),
+		canBeVisitedNodes: NewSet[Vec2D](),
+		position:          position,
+		direcion:          Vec2D{0, 1},
+		matrix:            matrix,
 	}
 }
 
-func (cr *Crawler) TryMove(dir Vec2D) bool {
-	nextPos := cr.position.Add(dir)
-	if !(nextPos.X >= 0 && nextPos.X < len(cr.matrix) && nextPos.Y >= 0 && nextPos.Y < len(cr.matrix[nextPos.X])) {
+func (cr *Crawler) Crawl() {
+	cr.CheckNeigbors()
+}
+
+func withinBounds(pos Vec2D, matrix [][]rune) bool {
+	if pos.X < 0 || pos.X > len(matrix)-1 {
 		return false
 	}
-
-	if cr.crop != cr.matrix[nextPos.X][nextPos.Y] {
+	if pos.Y < 0 || pos.Y > len(matrix[pos.X])-1 {
 		return false
 	}
-
-	if
-
-	cr.position = nextPos
 	return true
 }
 
-func (crawler *Crawler) Crawl() {
-	for {
-
+func (cr *Crawler) CheckNeigbors() {
+	for _, dir := range [4]Vec2D{
+		{0, -1}, // left
+		{1, 0},  // down
+		{0, 1},  // right
+		{-1, 0}, // up
+	} {
+		if dir.MulScalar(-1) == cr.direcion {
+			continue
+		}
+		nPos := cr.position.Add(dir)
+		if cr.CanGo(nPos) {
+			cr.canBeVisitedNodes.Add(nPos)
+		}
 	}
+}
+
+func (cr *Crawler) CanGo(pos Vec2D) bool {
+	if withinBounds(pos, cr.matrix) && cr.crop == cr.matrix[pos.X][pos.Y] {
+		return true
+	}
+	return false
 }
 
 func Part2(matrix [][]rune) int {
