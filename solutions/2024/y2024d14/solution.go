@@ -69,7 +69,101 @@ func Part1(data [][]int) int {
 }
 
 func Part2(data [][]int) int {
-	return 0
+	const gridHeight, gridWidth = 103, 101
+
+	robots := make([]Robot, 0)
+	for _, inp := range data {
+		robots = append(robots, NewRobot(inp))
+	}
+	fmt.Printf("%s\n", robots[0])
+
+	secondsPassed := 0
+	maxDensity := 0
+	maxDensityT := 0
+	for secondsPassed < 20000 {
+		secondsPassed++
+
+		for i := range robots {
+			robots[i].Move(1, gridHeight, gridWidth)
+		}
+
+		grid := robotsToPosGrid(robots, gridHeight, gridWidth)
+		newDensity := gridDensity(grid)
+		if newDensity > maxDensity {
+			maxDensityT = secondsPassed
+			maxDensity = newDensity
+		}
+		if secondsPassed == 7132 {
+			fmt.Printf("<><><>\n\nPassed: %d, density: %d\n", secondsPassed, newDensity)
+			printRobots(robots, gridHeight, gridWidth)
+		}
+	}
+	fmt.Printf("maxDensity: %d, t: %d\n", maxDensity, maxDensityT)
+	return maxDensityT
+}
+
+func robotsToPosGrid(robots []Robot, H, W int) [][]bool {
+	var grid [][]bool
+	for rowIdx := 0; rowIdx < H; rowIdx++ {
+		row := make([]bool, W)
+		grid = append(grid, row)
+	}
+	for _, r := range robots {
+		grid[r.position.X][r.position.Y] = true
+	}
+	return grid
+}
+
+func countNeighbors(rowIdx, colIdx int, posGrid [][]bool) int {
+	count := 0
+
+	if leftIdx := colIdx - 1; leftIdx >= 0 && posGrid[rowIdx][leftIdx] {
+		count++
+	}
+
+	if rightIdx := colIdx + 1; rightIdx < len(posGrid[rowIdx]) && posGrid[rowIdx][rightIdx] {
+		count++
+	}
+
+	if topIdx := rowIdx - 1; topIdx >= 0 && posGrid[topIdx][colIdx] {
+		count++
+	}
+
+	if bottomIdx := rowIdx + 1; bottomIdx < len(posGrid) && posGrid[bottomIdx][colIdx] {
+		count++
+	}
+	return count
+}
+
+func gridDensity(posGrid [][]bool) int {
+	totalNeighbors := 0
+	for i, row := range posGrid {
+		for j := range row {
+			if posGrid[i][j] {
+				totalNeighbors += countNeighbors(i, j, posGrid)
+			}
+		}
+	}
+	return totalNeighbors
+}
+
+func printRobots(robots []Robot, H, W int) {
+	var grid [][]byte
+	for i := 0; i < H; i++ {
+		row := make([]byte, W+1)
+		for j := range row {
+			row[j] = '.'
+		}
+		row[len(row)-1] = '\n'
+		grid = append(grid, row)
+	}
+	for _, r := range robots {
+		grid[r.position.X][r.position.Y] = 'R'
+	}
+
+	for _, row := range grid {
+		fmt.Print(string(row))
+	}
 }
 
 type Vec2D struct {
@@ -115,7 +209,6 @@ func NewRobot(input []int) Robot {
 
 func (r *Robot) Move(steps int, mapHeight, mapWidth int) {
 	r.position = r.position.Add(r.velocity.MulScalar(steps)).Wrap(mapHeight, mapWidth)
-
 }
 
 func (r Robot) String() string {
