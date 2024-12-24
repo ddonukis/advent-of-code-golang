@@ -1,10 +1,11 @@
 package y2024d12
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+	"slices"
 	"time"
+
+	"github.com/ddonukis/advent-of-code-golang/pkg/vec"
 )
 
 func Solve(inputPath string) {
@@ -22,110 +23,98 @@ func Solve(inputPath string) {
 }
 
 func Part1(matrix [][]rune) int {
-	fmt.Printf("%v\n", matrix)
-	crawler := NewCrawler(Vec2D{0, 0}, matrix)
-	crawler.Crawl()
-	return 0
-}
+	// printGrid(matrix)
 
-type Crawler struct {
-	crop              rune
-	visitedNodes      Set[Vec2D]
-	canBeVisitedNodes Set[Vec2D]
-	position          Vec2D
-	direcion          Vec2D
-	matrix            [][]rune
-}
+	visitedToGroupId := make(map[vec.Vec2D]int)
 
-func (cr Crawler) String() string {
-	field := make([][]byte, len(cr.matrix[0]))
-	for i, row := range cr.matrix {
-		field[i] = make([]byte, len(row))
-		for j := range field[i] {
-			field[i][j] = '.'
+	groupId := 0
+	for r, row := range matrix {
+		for c := range row {
+			startPos := vec.Vec2D{X: r, Y: c}
+			_, exists := visitedToGroupId[startPos]
+			if exists {
+				continue
+			}
+			expandTileGroup(startPos, groupId, matrix, visitedToGroupId)
+			groupId++
 		}
 	}
-	for visited := range cr.visitedNodes.items {
-		field[visited.X][visited.Y] = 'O'
-	}
-	for visited := range cr.canBeVisitedNodes.items {
-		field[visited.X][visited.Y] = 'X'
-	}
-	///
-	return ""
-}
 
-func NewCrawler(position Vec2D, matrix [][]rune) Crawler {
-	return Crawler{
-		crop:              matrix[position.X][position.Y],
-		visitedNodes:      NewSet[Vec2D](),
-		canBeVisitedNodes: NewSet[Vec2D](),
-		position:          position,
-		direcion:          Vec2D{0, 1},
-		matrix:            matrix,
-	}
-}
+	// printVisited(matrix, visitedToGroupId)
 
-func (cr *Crawler) Crawl() {
-	cr.CheckNeigbors()
-}
+	areaByGroupId := make([]int, groupId)
+	perimterByGroupId := make([]int, groupId)
 
-func withinBounds(pos Vec2D, matrix [][]rune) bool {
-	if pos.X < 0 || pos.X > len(matrix)-1 {
-		return false
+	for pos, groupId := range visitedToGroupId {
+		areaByGroupId[groupId] += 1
+		perimterByGroupId[groupId] += tilePerimeter(pos, groupId, visitedToGroupId)
 	}
-	if pos.Y < 0 || pos.Y > len(matrix[pos.X])-1 {
-		return false
-	}
-	return true
-}
 
-func (cr *Crawler) CheckNeigbors() {
-	for _, dir := range [4]Vec2D{
-		{0, -1}, // left
-		{1, 0},  // down
-		{0, 1},  // right
-		{-1, 0}, // up
-	} {
-		if dir.MulScalar(-1) == cr.direcion {
-			continue
-		}
-		nPos := cr.position.Add(dir)
-		if cr.CanGo(nPos) {
-			cr.canBeVisitedNodes.Add(nPos)
-		}
+	total := 0
+	for i, area := range areaByGroupId {
+		// fmt.Printf("group: %d, area: %d, perimiter: %d\n", i, area, perimterByGroupId[i])
+		total += area * perimterByGroupId[i]
 	}
-}
-
-func (cr *Crawler) CanGo(pos Vec2D) bool {
-	if withinBounds(pos, cr.matrix) && cr.crop == cr.matrix[pos.X][pos.Y] {
-		return true
-	}
-	return false
+	return total
 }
 
 func Part2(matrix [][]rune) int {
+	// fmt.Printf("%v\n", matrix)
 	return 0
 }
 
-func parseInput(inputPath string) [][]rune {
-	file, err := os.Open(inputPath)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	var matrix [][]rune
-	for scanner.Scan() {
-		if err := scanner.Err(); err != nil {
-			panic(err)
+func tilePerimeter(pos vec.Vec2D, groupId int, tilesByGroupId map[vec.Vec2D]int) int {
+	p := 0
+	for _, dir := range DIRECTIONS {
+		nextPos := pos.Add(dir)
+
+		nextGroupId, found := tilesByGroupId[nextPos]
+		if !found || (groupId != nextGroupId) {
+			p++
 		}
-		line := scanner.Text()
-		lineRunes := make([]rune, len(line))
-		for i, r := range line {
-			lineRunes[i] = r
-		}
-		matrix = append(matrix, lineRunes)
 	}
-	return matrix
+	return p
+}
+
+func expandTileGroup(
+	startPos vec.Vec2D,
+	groupId int,
+	grid [][]rune,
+	visited map[vec.Vec2D]int,
+) {
+	queue := []vec.Vec2D{startPos}
+
+	for len(queue) > 0 {
+		curPos := queue[0]
+		queue = slices.Delete(queue, 0, 1)
+		_, alreadyVisisted := visited[curPos]
+		if alreadyVisisted {
+			continue
+		}
+		visited[curPos] = groupId
+
+		for _, dir := range DIRECTIONS {
+			nextPos := curPos.Add(dir)
+
+			_, isVisited := visited[nextPos]
+
+			if isPossibleMove(nextPos, curPos, grid) && !isVisited {
+				queue = append(queue, nextPos)
+			}
+		}
+	}
+}
+
+var DIRECTIONS = [4]vec.Vec2D{
+	{X: -1, Y: 0},
+	{X: 0, Y: 1},
+	{X: 1, Y: 0},
+	{X: 0, Y: -1},
+}
+
+func isPossibleMove(nextPos, curPos vec.Vec2D, grid [][]rune) bool {
+	if nextPos.X < 0 || nextPos.X >= len(grid) || nextPos.Y < 0 || nextPos.Y >= len(grid[0]) {
+		return false
+	}
+	return grid[curPos.X][curPos.Y] == grid[nextPos.X][nextPos.Y]
 }

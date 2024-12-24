@@ -96,7 +96,7 @@ func exploreTrail(grid [][]int8, start Pos, part PartNo) (score int) {
 	return
 }
 
-func printVisited(grid [][]int8, visited set.Set[Pos]) {
+func PrintVisited(grid [][]int8, visited set.Set[Pos]) {
 	for r, row := range grid {
 		for c, i := range row {
 			if visited.Contains(Pos{r: int8(r), c: int8(c)}) {

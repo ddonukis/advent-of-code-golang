@@ -17,3 +17,7 @@ func (v Vec2D) MulScalar(n int) Vec2D {
 func (v Vec2D) String() string {
 	return fmt.Sprintf("(%d, %d)", v.X, v.Y)
 }
+
+func (v Vec2D) WithinBounds(height, width int) bool {
+	return v.X >= 0 && v.Y >= 0 && v.X < height && v.Y < width
+}
