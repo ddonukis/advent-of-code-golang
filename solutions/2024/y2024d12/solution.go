@@ -59,8 +59,79 @@ func Part1(matrix [][]rune) int {
 }
 
 func Part2(matrix [][]rune) int {
-	// fmt.Printf("%v\n", matrix)
-	return 0
+	printGrid(matrix)
+	visitedToGroupId := make(map[vec.Vec2D]int)
+
+	groupId := 0
+	for r, row := range matrix {
+		for c := range row {
+			startPos := vec.Vec2D{X: r, Y: c}
+			_, exists := visitedToGroupId[startPos]
+			if exists {
+				continue
+			}
+			expandTileGroup(startPos, groupId, matrix, visitedToGroupId)
+			groupId++
+		}
+	}
+
+	printVisited(matrix, visitedToGroupId)
+
+	areaByGroupId := make([]int, groupId)
+	sidesByGroupId := make([]int, groupId)
+
+	for pos, groupId := range visitedToGroupId {
+		areaByGroupId[groupId] += 1
+		sidesByGroupId[groupId] += tileCorners(pos, groupId, visitedToGroupId)
+	}
+
+	total := 0
+	for i, area := range areaByGroupId {
+		p := area * sidesByGroupId[i]
+		total += p
+		fmt.Printf("group %d: %d * %d = %d\n", i, area, sidesByGroupId[i], p)
+	}
+	return total
+}
+
+// go through each tile in a group (order doesn't matter) and look at all 4 sides:
+// if two neigbouring sides (e.g. North and West) are different group -> it's a convex corner
+// if two neighbouring sides are same group and the diagonal tile is different group -> it's concave corner
+func tileCorners(pos vec.Vec2D, groupId int, tilesByGroupId map[vec.Vec2D]int) int {
+	count := 0
+	for i := range DIRECTIONS {
+		nextPos := pos.Add(DIRECTIONS[i])
+		i2 := Mod(i+1, len(DIRECTIONS))
+		nextPos2 := pos.Add(DIRECTIONS[i2])
+
+		nextGroupId := getDefault(tilesByGroupId, nextPos, -1)
+		nextGroupId2 := getDefault(tilesByGroupId, nextPos2, -1)
+
+		if nextGroupId != groupId && nextGroupId2 != groupId {
+			// corner of a convex shape
+			count += 1
+		} else if nextGroupId == groupId && nextGroupId2 == groupId {
+			// corner of a concave shape
+			diagonalPos := nextPos.Add(DIRECTIONS[i2])
+			if getDefault(tilesByGroupId, diagonalPos, -1) != groupId {
+				count += 1
+			}
+		}
+	}
+	return count
+
+}
+
+func getDefault[T_K comparable, T_V any](m map[T_K]T_V, key T_K, defVal T_V) T_V {
+	val, found := m[key]
+	if !found {
+		return defVal
+	}
+	return val
+}
+
+func Mod(a, b int) int {
+	return (a%b + b) % b
 }
 
 func tilePerimeter(pos vec.Vec2D, groupId int, tilesByGroupId map[vec.Vec2D]int) int {
